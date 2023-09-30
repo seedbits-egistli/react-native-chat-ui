@@ -63,7 +63,8 @@ buck-out/
 /ios/Pods/
 
 # Library
-lib/
+# This is commented out because we(seedbits) are not shipping this package to NPM but referencing it directly via github branc/commit hash. So we need the lib folder being included in the package
+# lib/
 
 # Type coverage
 .type-coverage/
