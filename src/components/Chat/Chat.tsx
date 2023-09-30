@@ -81,6 +81,7 @@ export interface ChatProps extends ChatTopLevelProps {
   l10nOverride?: Partial<Record<keyof typeof l10n[keyof typeof l10n], string>>
   locale?: keyof typeof l10n
   messages: MessageType.Any[]
+  firstMessageToShow?: MessageType.Any,
   /** Used for pagination (infinite scroll). Called when user scrolls
    * to the very end of the list (minus `onEndReachedThreshold`).
    * See {@link ChatProps.flatListProps} to set it up. */
@@ -115,6 +116,7 @@ export const Chat = ({
   l10nOverride,
   locale = 'en',
   messages,
+  firstMessageToShow,
   onAttachmentPress,
   onEndReached,
   onMessageLongPress,
@@ -155,6 +157,7 @@ export const Chat = ({
   const [isNextPageLoading, setNextPageLoading] = React.useState(false)
   const [imageViewIndex, setImageViewIndex] = React.useState(0)
   const [stackEntry, setStackEntry] = React.useState<StatusBarProps>({})
+  const [hasScrollToFirstMessageToDisplay, setHasScrollToFirstMessageToDisplay] = React.useState(false);
 
   const l10nValue = React.useMemo(
     () => ({ ...l10n[locale], ...unwrap(l10nOverride) }),
@@ -182,6 +185,19 @@ export const Chat = ({
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    if (messages.length > 0) {
+      if (firstMessageToShow && !hasScrollToFirstMessageToDisplay) {
+        const index = messages.indexOf(firstMessageToShow);
+        if (index >= 0) {
+          list.current?.scrollToIndex({
+            index,
+            animated: false
+          })
+        }
+      }
+      setHasScrollToFirstMessageToDisplay(false);
+    }
   }, [chatMessages])
 
   React.useEffect(() => {
