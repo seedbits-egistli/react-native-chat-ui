@@ -81,7 +81,7 @@ export interface ChatProps extends ChatTopLevelProps {
   l10nOverride?: Partial<Record<keyof typeof l10n[keyof typeof l10n], string>>
   locale?: keyof typeof l10n
   messages: MessageType.Any[]
-  firstMessageToShow?: MessageType.Any,
+  firstMessageToShow?: MessageType.Any
   /** Used for pagination (infinite scroll). Called when user scrolls
    * to the very end of the list (minus `onEndReachedThreshold`).
    * See {@link ChatProps.flatListProps} to set it up. */
@@ -157,7 +157,10 @@ export const Chat = ({
   const [isNextPageLoading, setNextPageLoading] = React.useState(false)
   const [imageViewIndex, setImageViewIndex] = React.useState(0)
   const [stackEntry, setStackEntry] = React.useState<StatusBarProps>({})
-  const [hasScrollToFirstMessageToDisplay, setHasScrollToFirstMessageToDisplay] = React.useState(false);
+  const [
+    hasScrollToFirstMessageToDisplay,
+    setHasScrollToFirstMessageToDisplay,
+  ] = React.useState(false)
 
   const l10nValue = React.useMemo(
     () => ({ ...l10n[locale], ...unwrap(l10nOverride) }),
@@ -188,15 +191,15 @@ export const Chat = ({
 
     if (messages.length > 0) {
       if (firstMessageToShow && !hasScrollToFirstMessageToDisplay) {
-        const index = messages.indexOf(firstMessageToShow);
+        const index = messages.indexOf(firstMessageToShow)
         if (index >= 0) {
           list.current?.scrollToIndex({
             index,
-            animated: false
+            animated: false,
           })
         }
       }
-      setHasScrollToFirstMessageToDisplay(false);
+      setHasScrollToFirstMessageToDisplay(true)
     }
   }, [chatMessages])
 
@@ -368,6 +371,21 @@ export const Chat = ({
       ),
     [footer, footerLoadingPage, isNextPageLoading, theme.colors.primary]
   )
+
+  if (!flatListProps) {
+    flatListProps = {}
+  }
+  flatListProps.onScrollToIndexFailed = (info: any) => {
+    list.current?.scrollToOffset({
+      offset: info.averageItemLength * info.index,
+      animated: false,
+    })
+    setTimeout(() => {
+      if (messages.length !== 0 && list.current !== null) {
+        list.current.scrollToIndex({ index: info.index, animated: false })
+      }
+    }, 100)
+  }
 
   const renderScrollable = React.useCallback(
     (panHandlers: GestureResponderHandlers) => (
